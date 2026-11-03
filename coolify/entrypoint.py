@@ -92,9 +92,18 @@ def write_world_config(world, index):
     target.chmod(0o600)
     if os.environ.get("WEB_PLAYERS", "no").lower() == "yes":
         proxy_net = os.environ.get("PROXY_NET", "172.30.42.0/24")
-        transport = ET.Element("BasisWebSocketTransportConfig")
-        ET.SubElement(transport, "TrustedProxies").text = proxy_net
         transport_path = root / "config" / "transports" / "websocket.xml"
+        if transport_path.is_file():
+            try:
+                transport = ET.parse(transport_path).getroot()
+            except ET.ParseError as exc:
+                raise SystemExit(f"Invalid WebSocket transport config {transport_path}: {exc}")
+        else:
+            transport = ET.Element("BasisWebSocketTransportConfig")
+        trusted = transport.find("TrustedProxies")
+        if trusted is None:
+            trusted = ET.SubElement(transport, "TrustedProxies")
+        trusted.text = proxy_net
         transport_path.write_bytes(ET.tostring(transport, encoding="utf-8", xml_declaration=True))
     world.update({
         "root": root,
