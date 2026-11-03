@@ -21,7 +21,6 @@ services:
       EnableConsole: "false"
       UsingLoggingFile: "false"
       PROXY_NET: ${PROXY_NET:-172.30.42.0/24}
-      COOLIFY_PROXY_NET: ${COOLIFY_PROXY_NET:-}
     volumes:
       - ../worlds.conf:/etc/basis/worlds.conf:ro
       - basis-data:/data
@@ -51,7 +50,6 @@ services:
       - "80"
     networks:
       - default
-      - coolify
     volumes:
       - caddy-config:/etc/caddy:ro
       - caddy-data:/data
@@ -73,5 +71,3 @@ networks:
     ipam:
       config:
         - subnet: ${PROXY_NET:-172.30.42.0/24}
-  coolify:
-    external: true
