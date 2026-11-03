@@ -1,0 +1,20 @@
+# Build the upstream Basis server and WebSocket transport from pinned refs.
+FROM mcr.microsoft.com/dotnet/sdk:10.0-noble AS build
+ARG BASIS_REF=2f5b3e106ea10a1dc96b208d000428a335ef7c6c
+ARG WEBSOCKET_REF=62a4468432eb82c78ac744a7e78fca4bb91f7c8a
+WORKDIR /src
+RUN apt-get update && apt-get install -y --no-install-recommends git ca-certificates gawk && rm -rf /var/lib/apt/lists/*
+COPY . .
+RUN BASIS_REF="$BASIS_REF" WEBSOCKET_REF="$WEBSOCKET_REF" ./fetch-basis.sh
+WORKDIR "/src/basis/Basis Server/BasisServerConsole"
+RUN dotnet restore ./BasisNetworkConsole.csproj && dotnet publish -c Release --no-restore -o /app/publish
+
+FROM mcr.microsoft.com/dotnet/runtime:10.0-noble
+RUN apt-get update && apt-get install -y --no-install-recommends python3 curl ca-certificates && rm -rf /var/lib/apt/lists/*
+WORKDIR /opt/basis
+COPY --from=build /app/publish/ ./
+COPY coolify/entrypoint.py /opt/basis/entrypoint.py
+COPY coolify/healthcheck.py /opt/basis/healthcheck.py
+ENV PYTHONUNBUFFERED=1 HealthCheckHost="*" EnableStatistics=true EnableConsole=false UsingLoggingFile=false
+EXPOSE 4296-4395/udp
+ENTRYPOINT ["python3", "/opt/basis/entrypoint.py"]
