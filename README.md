@@ -16,7 +16,7 @@ own name (`forest.worlds.example.com`), using DNS SRV records. Players type a na
 - **Optional extras:** portals between worlds (a tested prop script), per-world admin dashboards,
   and web players (WebSocket behind a generated Caddy TLS front).
 
-**Start here: [the tutorial](docs/tutorial.md).**
+**Start here: [the tutorial](docs/tutorial.md).** For a one-resource Coolify deployment, see the [Coolify guide](docs/coolify.md).
 
 ```sh
 cp .env.example .env && chmod 600 .env     # fill it in
