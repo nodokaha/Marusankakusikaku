@@ -10,9 +10,13 @@ deployments.
 1. In Coolify, create a Docker Compose resource from https://github.com/nodokaha/Marusankakusikaku.
 2. Set the Compose file path to coolify/compose.yaml.
 3. Configure the environment variables below in the resource's Environment Variables panel.
-4. Add COMPOSE_PROFILES=web if you want browser clients / WSS through Caddy. Leave it unset for
-   native UDP-only operation.
-5. Deploy. The first build downloads the pinned Basis and WebSocket transport sources and compiles
+4. Add COMPOSE_PROFILES=web and WEB_PLAYERS=yes if you want browser clients / WSS. Leave the
+   profile unset for native UDP-only operation.
+5. When the web profile is enabled, configure the Coolify proxy domain(s) on the caddy service,
+   targeting internal port 80. Add the hub domain (DNS_ZONE), the hub slug domain, DNS_HOST.DNS_ZONE,
+   and one domain for every other world slug. Coolify's proxy provides HTTPS; Caddy routes the
+   resulting HTTP/WebSocket traffic to the correct Basis listener.
+6. Deploy. The first build downloads the pinned Basis and WebSocket transport sources and compiles
    the server; this can take several minutes and needs roughly 1.5 GB RAM and 2 GB free disk.
 
 Do not add a separate Coolify resource for each world. Do not expose health ports or dashboard ports.
@@ -42,8 +46,10 @@ For web clients, additionally set:
 - DNS_HOST=vm1 (single DNS label; defaults to vm1)
 - optionally WEB_CLIENT_URL=https://play.worlds.example.com
 
-Caddy obtains certificates automatically. TCP 80 and 443 must be reachable, and all world TCP
-ports in the published range are forwarded to Caddy. UDP game traffic goes directly to Basis.
+Coolify's proxy obtains and renews HTTPS certificates for the configured domains. Do not publish
+host ports 80 or 443 from this Compose stack: Coolify already owns them. WSS uses the normal HTTPS
+port 443 through the proxy; UDP game traffic goes directly to Basis. Set PROXY_NET to a subnet that
+does not overlap another Docker network if the default 172.30.42.0/24 is already in use.
 
 ## 3. Configure the worlds
 
@@ -70,7 +76,7 @@ dns-records.sh for the BIND records.
 Coolify's named volumes persist across redeployments:
 
 - basis-data: world configuration, player storage, saved props and default library
-- caddy-data and caddy-state: ACME certificates and Caddy state
+- caddy-data and caddy-state: Caddy state (TLS certificates are managed by the Coolify proxy)
 
 Back up these volumes and keep a copy of .env and worlds.conf. Changing BASIS_REF or WEBSOCKET_REF
 triggers a new image build. Changing worlds.conf or runtime variables requires redeployment.
@@ -83,4 +89,4 @@ triggers a new image build. Changing worlds.conf or runtime variables requires r
 - The optional per-world dashboard containers from the conventional Compose workflow are not part
   of this preset. Use the existing configure.sh deployment if you need those dashboard services.
 - The WebSocket package is included in the image; set WEB_PLAYERS=yes and enable the web Compose
-  profile to activate the Caddy frontend.
+  profile. Configure all world domains on the caddy service at internal port 80 in Coolify.
