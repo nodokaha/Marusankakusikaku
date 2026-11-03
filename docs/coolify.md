@@ -51,7 +51,7 @@ host ports 80 or 443 from this Compose stack: Coolify already owns them. WSS use
 port 443 through the proxy; UDP game traffic goes directly to Basis. Set PROXY_NET to a subnet that
 does not overlap another Docker network if the default 172.30.42.0/24 is already in use. Set
 COOLIFY_PROXY_NET to the CIDR of the Coolify proxy's Docker network if you want the original client
-IP forwarded through Caddy to Basis.
+IP forwarded through Caddy to Basis. Find it with docker network inspect coolify.
 
 ## 3. Configure the worlds
 
