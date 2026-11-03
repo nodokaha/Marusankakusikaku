@@ -68,8 +68,8 @@ Each bundle may be an absolute HTTPS URL or a path relative to CDN_BASE. World d
 saved props, storage and default-library files are stored in the named basis-data volume under
 /data/worlds/<slug>.
 
-The Basis service publishes UDP and the Caddy service publishes TCP over the configured port range.
-Keep the range as small as practical and ensure the firewall allows the ports used by your worlds.
+The Basis service publishes UDP over the configured port range. Keep the range as small as
+practical and ensure the firewall allows the UDP ports used by your worlds.
 DNS SRV records are still required for native clients to discover each world's UDP port; use
 dns-records.sh for the BIND records.
 
