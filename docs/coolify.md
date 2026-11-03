@@ -1,7 +1,7 @@
 # Deploy BasisMultiWorld with Coolify
 
 This preset runs the complete multi-world stack as one Coolify Docker Compose resource. One Basis
-container supervises the configured worlds; an optional Caddy service provides HTTPS/WSS. The
+container supervises the configured worlds; an optional Caddy service routes HTTP/WebSocket traffic behind the Coolify proxy. The
 existing configure.sh + generated Compose workflow remains available for conventional Docker Compose
 deployments.
 
@@ -32,8 +32,8 @@ Use .env.example as the starting point. At minimum:
 | CDN_BASE | https://cdn.example.com/basis | Base URL for relative .BEE bundle paths |
 | UNLOCK_PASSWORD | secret | Bundle build password; per-world UNLOCK_PASSWORD_SLUG overrides it |
 | BASIS_FIRST_ADMIN | did:key:... | Comma-separated admin DID(s), seeded on first boot |
-| WORLD_PORT_START | 4296 | First published UDP/TCP port |
-| WORLD_PORT_END | 4395 | Last published UDP/TCP port |
+| WORLD_PORT_START | 4296 | First published UDP port |
+| WORLD_PORT_END | 4395 | Last published UDP port |
 
 Set HUB_PASSWORD, FOREST_PASSWORD, etc. for join passwords; optional per-world variables are
 <SLUG>_MOTD, <SLUG>_PEER_LIMIT, and <SLUG>_API_KEY. Slugs are upper-cased and dashes become
@@ -49,7 +49,9 @@ For web clients, additionally set:
 Coolify's proxy obtains and renews HTTPS certificates for the configured domains. Do not publish
 host ports 80 or 443 from this Compose stack: Coolify already owns them. WSS uses the normal HTTPS
 port 443 through the proxy; UDP game traffic goes directly to Basis. Set PROXY_NET to a subnet that
-does not overlap another Docker network if the default 172.30.42.0/24 is already in use.
+does not overlap another Docker network if the default 172.30.42.0/24 is already in use. Set
+COOLIFY_PROXY_NET to the CIDR of the Coolify proxy's Docker network if you want the original client
+IP forwarded through Caddy to Basis.
 
 ## 3. Configure the worlds
 
@@ -89,4 +91,5 @@ triggers a new image build. Changing worlds.conf or runtime variables requires r
 - The optional per-world dashboard containers from the conventional Compose workflow are not part
   of this preset. Use the existing configure.sh deployment if you need those dashboard services.
 - The WebSocket package is included in the image; set WEB_PLAYERS=yes and enable the web Compose
-  profile. Configure all world domains on the caddy service at internal port 80 in Coolify.
+  profile. Configure all world domains on the caddy service at internal port 80 in Coolify. The
+  Coolify proxy terminates TLS on 443; Caddy itself is not published on host ports 80/443.
