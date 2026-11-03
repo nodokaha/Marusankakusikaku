@@ -33,7 +33,7 @@ Basis サーバーのコンテナ1つが worlds.conf に記載された全ワー
 | UNLOCK_PASSWORD | secret | バンドルのパスワード |
 | BASIS_FIRST_ADMIN | did:key:... | 初回起動時の管理者 DID |
 | WORLD_PORT_START | 4296 | UDP 公開ポート範囲の開始 |
-| WORLD_PORT_END | 4395 | UDP 公開ポート範囲の終了 |
+| WORLD_PORT_END | 4298 | UDP 公開ポート範囲の終了 |
 
 参加パスワードは HUB_PASSWORD、FOREST_PASSWORD のように設定します。
 任意で <SLUG>_MOTD、<SLUG>_PEER_LIMIT、<SLUG>_API_KEY も指定できます。
