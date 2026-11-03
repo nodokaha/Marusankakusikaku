@@ -17,7 +17,7 @@
 - **任意の追加機能：** ワールド間ポータル（動作確認済みのプロップ用スクリプト）、ワールドごとの管理ダッシュボード、
   Web プレイヤー（自動生成される Caddy の TLS の背後で WebSocket を使用）。
 
-**まずは[チュートリアル](docs/tutorial.ja.md)をご覧ください。**
+**まずは[チュートリアル](docs/tutorial.ja.md)をご覧ください。** Coolify のリソース1つで運用する場合は[Coolify 導入ガイド](docs/coolify.ja.md)をご覧ください。
 
 ```sh
 cp .env.example .env && chmod 600 .env     # 中身を記入

@@ -1,0 +1,73 @@
+# Select this file as the Compose file in Coolify.
+# Set COMPOSE_PROFILES=web to enable Caddy routing behind the Coolify TLS proxy.
+services:
+  basis:
+    build:
+      context: ..
+      dockerfile: Dockerfile.coolify
+      args:
+        BASIS_REF: ${BASIS_REF:-2f5b3e106ea10a1dc96b208d000428a335ef7c6c}
+        WEBSOCKET_REF: ${WEBSOCKET_REF:-62a4468432eb82c78ac744a7e78fca4bb91f7c8a}
+    image: basis-multiworld-coolify:local
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      WORLD_CONFIG: /etc/basis/worlds.conf
+      DATA_ROOT: /data
+      CADDY_CONFIG: /shared/caddy/Caddyfile
+      HealthCheckHost: "*"
+      EnableStatistics: "true"
+      EnableConsole: "false"
+      UsingLoggingFile: "false"
+      PROXY_NET: ${PROXY_NET:-172.30.42.0/24}
+    volumes:
+      - ../worlds.conf:/etc/basis/worlds.conf:ro
+      - basis-data:/data
+      - caddy-config:/shared/caddy
+    ports:
+      - "${WORLD_PORT_START:-4296}-${WORLD_PORT_END:-4298}:${WORLD_PORT_START:-4296}-${WORLD_PORT_END:-4298}/udp"
+    healthcheck:
+      test: ["CMD", "python3", "/opt/basis/healthcheck.py"]
+      interval: 30s
+      timeout: 8s
+      retries: 3
+      start_period: 90s
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+  caddy:
+    image: caddy:2.11.7-alpine
+    restart: unless-stopped
+    profiles: ["web"]
+    depends_on:
+      basis:
+        condition: service_healthy
+    expose:
+      - "80"
+    networks:
+      - default
+    volumes:
+      - caddy-config:/etc/caddy:ro
+      - caddy-data:/data
+      - caddy-state:/config
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+volumes:
+  basis-data:
+  caddy-config:
+  caddy-data:
+  caddy-state:
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: ${PROXY_NET:-172.30.42.0/24}

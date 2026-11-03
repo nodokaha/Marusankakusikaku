@@ -1,0 +1,9 @@
+# Never send runtime secrets or persistent state to the Docker build context.
+.env
+.env.*
+!.env.example
+basis/
+worlds/
+caddy/
+docker-compose.yml
+.git/
