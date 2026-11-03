@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Prepare persistent world state, generate Caddy routing, and supervise Basis worlds."""
+import ipaddress
 import os
 import re
 import signal
@@ -115,7 +116,17 @@ def write_caddy(worlds):
     if not re.fullmatch(r"[a-z0-9-]+", host):
         raise SystemExit("DNS_HOST must be a single DNS label")
     web_client = os.environ.get("WEB_CLIENT_URL", "").rstrip("/")
-    lines = ["# TLS is terminated by the Coolify proxy; Caddy receives HTTP on its private service network.", ""]
+    proxy_ranges = os.environ.get("COOLIFY_PROXY_NET", "").split()
+    for network in proxy_ranges:
+        try:
+            ipaddress.ip_network(network, strict=False)
+        except ValueError:
+            raise SystemExit(f"Invalid COOLIFY_PROXY_NET entry: {network}")
+    lines = ["# TLS is terminated by the Coolify proxy; Caddy receives HTTP on its private service network.", "{", "  servers {", "    protocols h1 h2"]
+    if proxy_ranges:
+        lines.append("    trusted_proxies static " + " ".join(proxy_ranges))
+        lines.append("    client_ip_headers X-Forwarded-For")
+    lines.extend(["  }", "}", ""])
     for i, world in enumerate(worlds):
         slug, port = world["slug"], world["port"]
         names = [f"{slug}.{zone}"]
