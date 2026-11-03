@@ -33,7 +33,7 @@ Use .env.example as the starting point. At minimum:
 | UNLOCK_PASSWORD | secret | Bundle build password; per-world UNLOCK_PASSWORD_SLUG overrides it |
 | BASIS_FIRST_ADMIN | did:key:... | Comma-separated admin DID(s), seeded on first boot |
 | WORLD_PORT_START | 4296 | First published UDP port |
-| WORLD_PORT_END | 4395 | Last published UDP port |
+| WORLD_PORT_END | 4298 | Last published UDP port |
 
 Set HUB_PASSWORD, FOREST_PASSWORD, etc. for join passwords; optional per-world variables are
 <SLUG>_MOTD, <SLUG>_PEER_LIMIT, and <SLUG>_API_KEY. Slugs are upper-cased and dashes become
