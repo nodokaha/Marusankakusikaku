@@ -125,12 +125,12 @@ def write_caddy(worlds):
     if not re.fullmatch(r"[a-z0-9-]+", host):
         raise SystemExit("DNS_HOST must be a single DNS label")
     web_client = os.environ.get("WEB_CLIENT_URL", "").rstrip("/")
-    proxy_ranges = os.environ.get("COOLIFY_PROXY_NET", "").split()
+    proxy_ranges = os.environ.get("PROXY_NET", "172.30.42.0/24").split()
     for network in proxy_ranges:
         try:
             ipaddress.ip_network(network, strict=False)
         except ValueError:
-            raise SystemExit(f"Invalid COOLIFY_PROXY_NET entry: {network}")
+            raise SystemExit(f"Invalid PROXY_NET entry: {network}")
     lines = ["# TLS is terminated by the Coolify proxy; Caddy receives HTTP on its private service network.", "{", "  servers {", "    protocols h1 h2"]
     if proxy_ranges:
         lines.append("    trusted_proxies static " + " ".join(proxy_ranges))
