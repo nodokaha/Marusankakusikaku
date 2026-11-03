@@ -1,5 +1,5 @@
 # Select this file as the Compose file in Coolify.
-# Set COMPOSE_PROFILES=web to enable the optional Caddy TLS/WSS frontend.
+# Set COMPOSE_PROFILES=web to enable Caddy routing behind the Coolify TLS proxy.
 services:
   basis:
     build:
