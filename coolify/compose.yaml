@@ -21,6 +21,7 @@ services:
       EnableConsole: "false"
       UsingLoggingFile: "false"
       PROXY_NET: ${PROXY_NET:-172.30.42.0/24}
+      COOLIFY_PROXY_NET: ${COOLIFY_PROXY_NET:-}
     volumes:
       - ../worlds.conf:/etc/basis/worlds.conf:ro
       - basis-data:/data
