@@ -2,7 +2,7 @@
 
 この構成は Coolify の Docker Compose リソース1つで複数の Basis ワールドを運用します。
 Basis サーバーのコンテナ1つが worlds.conf に記載された全ワールドを起動・監視し、
-必要に応じて Caddy がワールド名に応じたルーティングを行い、HTTPS は Coolify の Proxy が終端します。従来の configure.sh と生成 Compose による
+必要に応じて Caddy が Coolify Proxy の背後で HTTP/WebSocket をワールドごとに振り分けます。HTTPS は Coolify Proxy が終端します。従来の configure.sh と生成 Compose による
 通常の Docker Compose 運用も引き続き利用できます。
 
 ## 1. Coolify リソースを作成
@@ -32,8 +32,8 @@ Basis サーバーのコンテナ1つが worlds.conf に記載された全ワー
 | CDN_BASE | https://cdn.example.com/basis | .BEE の相対 URL のベース |
 | UNLOCK_PASSWORD | secret | バンドルのパスワード |
 | BASIS_FIRST_ADMIN | did:key:... | 初回起動時の管理者 DID |
-| WORLD_PORT_START | 4296 | 公開ポート範囲の開始 |
-| WORLD_PORT_END | 4395 | 公開ポート範囲の終了 |
+| WORLD_PORT_START | 4296 | UDP 公開ポート範囲の開始 |
+| WORLD_PORT_END | 4395 | UDP 公開ポート範囲の終了 |
 
 参加パスワードは HUB_PASSWORD、FOREST_PASSWORD のように設定します。
 任意で <SLUG>_MOTD、<SLUG>_PEER_LIMIT、<SLUG>_API_KEY も指定できます。
@@ -49,7 +49,7 @@ Web クライアントを使う場合は追加で以下を設定します。
 
 HTTPS 証明書は Coolify Proxy が自動取得・更新します。この Compose からホストの 80/443 を公開しないでください。
 WSS は Proxy 経由で通常の HTTPS ポート 443 を使い、ゲーム通信の UDP は Basis コンテナに直接転送されます。
-既定の 172.30.42.0/24 が他の Docker ネットワークと重複する場合は PROXY_NET を変更してください。
+既定の 172.30.42.0/24 が他の Docker ネットワークと重複する場合は PROXY_NET を変更してください。Caddy 経由で実際の接続元 IP を Basis に渡す場合は COOLIFY_PROXY_NET に Coolify Proxy の Docker ネットワーク CIDR を設定してください。
 
 ## 3. ワールド設定
 
@@ -85,4 +85,4 @@ worlds.conf や実行時環境変数の変更時はサービスを再デプロ�
   いずれかのワールドが異常終了すると、現在は全ワールドを停止します。
 - 既存 Compose のワールド別ダッシュボードコンテナは、このプリセットには含めていません。
   ダッシュボードが必要な場合は従来の configure.sh による構成を利用してください。
-- WebSocket transport はイメージに含まれます。Caddy を使うには WEB_PLAYERS=yes と Compose profile web の両方が必要です。Coolify で caddy サービスの内部ポート 80 に各ドメインを割り当ててください。
+- WebSocket transport はイメージに含まれます。Caddy を使うには WEB_PLAYERS=yes と Compose profile web の両方が必要です。Coolify で caddy サービスの内部ポート 80 に各ドメインを割り当ててください。TLS は Coolify Proxy が 443 で終端するため、Caddy の 80/443 をホストに公開しません。
