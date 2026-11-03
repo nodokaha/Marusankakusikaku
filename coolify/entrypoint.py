@@ -89,6 +89,12 @@ def write_world_config(world, index):
     target = root / "initialresources" / "world.xml"
     target.write_bytes(ET.tostring(config, encoding="utf-8", xml_declaration=True))
     target.chmod(0o600)
+    if os.environ.get("WEB_PLAYERS", "no").lower() == "yes":
+        proxy_net = os.environ.get("PROXY_NET", "172.30.42.0/24")
+        transport = ET.Element("BasisWebSocketTransportConfig")
+        ET.SubElement(transport, "TrustedProxies").text = proxy_net
+        transport_path = root / "config" / "transports" / "websocket.xml"
+        transport_path.write_bytes(ET.tostring(transport, encoding="utf-8", xml_declaration=True))
     world.update({
         "root": root,
         "health_port": 10666 + index,
@@ -103,33 +109,30 @@ def write_caddy(worlds):
     if os.environ.get("WEB_PLAYERS", "no").lower() != "yes":
         return
     zone = os.environ.get("DNS_ZONE", "").strip().rstrip(".").lower()
-    host = os.environ.get("DNS_HOST", "vm1").strip().lower()
     if not zone or "." not in zone:
         raise SystemExit("WEB_PLAYERS=yes requires DNS_ZONE to be a real domain, e.g. worlds.example.com")
+    host = os.environ.get("DNS_HOST", "vm1").strip().lower()
     if not re.fullmatch(r"[a-z0-9-]+", host):
         raise SystemExit("DNS_HOST must be a single DNS label")
     web_client = os.environ.get("WEB_CLIENT_URL", "").rstrip("/")
-    lines = ["{", "  servers {", "    protocols h1 h2", "  }", "}", ""]
+    lines = ["# TLS is terminated by the Coolify proxy; Caddy receives HTTP on its private service network.", ""]
     for i, world in enumerate(worlds):
         slug, port = world["slug"], world["port"]
         names = [f"{slug}.{zone}"]
         if i == 0:
             names = [zone, f"{slug}.{zone}", f"{host}.{zone}"]
-        addresses = names + [f"{name}:4296" for name in names]
-        if port != 4296:
-            addresses.append(f"{slug}.{zone}:{port}")
-        lines.append(", ".join(addresses) + " {")
+        lines.append(", ".join("http://" + name for name in names) + " {")
         if web_client:
             lines.extend([
                 "  @webpage header Accept *text/html*",
-                f"  redir @webpage {web_client}/?connection={{host}} 302",
+                f"  redir @webpage {web_client}/?connection={{host}}:443 302",
             ])
         lines.extend([f"  reverse_proxy basis:{port}", "}", ""])
     CADDY_FILE.parent.mkdir(parents=True, exist_ok=True)
     temp = CADDY_FILE.with_suffix(".tmp")
-    temp.write_text("\n".join(lines), encoding="utf-8")
+    temp.write_text("\\n".join(lines), encoding="utf-8")
     temp.replace(CADDY_FILE)
-    print(f"Generated Caddy routes for {len(worlds)} worlds in {zone}", flush=True)
+    print(f"Generated Coolify proxy routes for {len(worlds)} worlds in {zone}", flush=True)
 
 
 def stop_all(*_):
