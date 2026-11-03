@@ -27,7 +27,7 @@ services:
       - basis-data:/data
       - caddy-config:/shared/caddy
     ports:
-      - "${WORLD_PORT_START:-4296}-${WORLD_PORT_END:-4395}:${WORLD_PORT_START:-4296}-${WORLD_PORT_END:-4395}/udp"
+      - "${WORLD_PORT_START:-4296}-${WORLD_PORT_END:-4298}:${WORLD_PORT_START:-4296}-${WORLD_PORT_END:-4298}/udp"
     healthcheck:
       test: ["CMD", "python3", "/opt/basis/healthcheck.py"]
       interval: 30s
