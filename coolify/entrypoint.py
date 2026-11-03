@@ -130,7 +130,7 @@ def write_caddy(worlds):
         lines.extend([f"  reverse_proxy basis:{port}", "}", ""])
     CADDY_FILE.parent.mkdir(parents=True, exist_ok=True)
     temp = CADDY_FILE.with_suffix(".tmp")
-    temp.write_text("\\n".join(lines), encoding="utf-8")
+    temp.write_text("\n".join(lines), encoding="utf-8")
     temp.replace(CADDY_FILE)
     print(f"Generated Coolify proxy routes for {len(worlds)} worlds in {zone}", flush=True)
 
