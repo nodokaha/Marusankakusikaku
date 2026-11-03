@@ -20,6 +20,7 @@ services:
       EnableStatistics: "true"
       EnableConsole: "false"
       UsingLoggingFile: "false"
+      PROXY_NET: ${PROXY_NET:-172.30.42.0/24}
     volumes:
       - ../worlds.conf:/etc/basis/worlds.conf:ro
       - basis-data:/data
@@ -45,10 +46,11 @@ services:
     depends_on:
       basis:
         condition: service_healthy
-    ports:
-      - "80:80/tcp"
-      - "443:443/tcp"
-      - "${WORLD_PORT_START:-4296}-${WORLD_PORT_END:-4395}:${WORLD_PORT_START:-4296}-${WORLD_PORT_END:-4395}/tcp"
+    expose:
+      - "80"
+    networks:
+      - default
+      - coolify
     volumes:
       - caddy-config:/etc/caddy:ro
       - caddy-data:/data
@@ -64,3 +66,11 @@ volumes:
   caddy-config:
   caddy-data:
   caddy-state:
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: ${PROXY_NET:-172.30.42.0/24}
+  coolify:
+    external: true
