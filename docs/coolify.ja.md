@@ -49,7 +49,7 @@ Web クライアントを使う場合は追加で以下を設定します。
 
 HTTPS 証明書は Coolify Proxy が自動取得・更新します。この Compose からホストの 80/443 を公開しないでください。
 WSS は Proxy 経由で通常の HTTPS ポート 443 を使い、ゲーム通信の UDP は Basis コンテナに直接転送されます。
-既定の 172.30.42.0/24 が他の Docker ネットワークと重複する場合は PROXY_NET を変更してください。Caddy 経由で実際の接続元 IP を Basis に渡す場合は COOLIFY_PROXY_NET に Coolify Proxy の Docker ネットワーク CIDR を設定してください。
+既定の 172.30.42.0/24 が他の Docker ネットワークと重複する場合は PROXY_NET を変更してください。Coolify Proxy はこのリソースネットワークにも接続するため、同じ PROXY_NET を Caddy と Basis の信頼対象にします。
 
 ## 3. ワールド設定
 
